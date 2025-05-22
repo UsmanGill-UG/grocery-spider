@@ -8,7 +8,7 @@ class GroceryItem(Item):
     ean = Field()
     category = Field()
     image_urls = Field()
-    manufacturer_country = Field()
+    country = Field() # country of origin
     price = Field() # will be a dict with keys: price, currency
     ingredients = Field() # will be a list of dicts with keys: name, quantity, unit
     allergens = Field()

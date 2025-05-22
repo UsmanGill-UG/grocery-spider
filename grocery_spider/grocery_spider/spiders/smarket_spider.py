@@ -4,78 +4,15 @@ from w3lib.url import add_or_replace_parameters as aorp
 from ..items import GroceryItem
 
 
-# class CarhattSpider(scrapy.Spider):
-#     name = 'smarket_product'
-#     allowed_domains = ['s-kaupat.fi']
-#     BASE_URL = 'https://www.s-kaupat.fi'
-#     # PRODUCTS_URL = '{base_url}/products?sort=&size=12&brandIds=15'
-#     # PRODUCT_DETAIL = '{base_url}/products/{product_id}/detail'
-#     # start_urls = [f'{BASE_URL}/categories?sourceSite=CARHARTT']
-#     start_urls = ['https://www.s-kaupat.fi/tuote/kotimaista-kevytmaito-1-l/6414893386488']
+# this class is get the product links
+class SMarketSpider(scrapy.Spider):
+    name = 'smarket_product'
+    allowed_domains = ['s-kaupat.fi']
 
-#     def parse(self, response):
-#         category_data = response.json()
-
-#         for item in category_data.get('payload', []):
-#             if category_id := item.get('categoryId'):
-#                 products_base_url = self.PRODUCTS_URL.format(base_url=self.BASE_URL)
-#                 params = {
-#                     'mainCategoryId': category_id,
-#                     'page': '0',
-#                 }
-#                 products_url = add_or_replace_parameters(products_base_url, params)
-
-#             yield scrapy.Request(
-#                     products_url,
-#                     callback=self.parse_products_pages,
-#                     meta={'category_id': category_id}
-#                 )
-
-#     def parse_products_pages(self, response):
-#         products_page_info = response.json()
-#         total_pages = products_page_info['payload']['totalPages']
-#         category_id = response.meta['category_id']
-
-#         for page in range(total_pages+1):
-#             products_base_url = self.PRODUCTS_URL.format(base_url=self.BASE_URL)
-#             params = {
-#                 'mainCategoryId': category_id,
-#                 'page': str(page),
-#             }
-#             product_url = add_or_replace_parameters(products_base_url, params)
-
-#             yield scrapy.Request(
-#                 product_url,
-#                 callback=self.parse_products,
-#             )
-
-#     def parse_products(self, response):
-#         products_page = response.json()
-#         products = products_page['payload']['content']
-#         parser = CarhattParser()
-
-#         for product in products:
-#             product_id = product.get('productId')
-#             product_detail_url = (
-#                 self.PRODUCT_DETAIL.format(
-#                     base_url=self.BASE_URL,
-#                     product_id=product_id
-#                 )
-#             )
-
-#             yield scrapy.Request(
-#                 product_detail_url,
-#                 callback=parser.parse,
-#             )
-
-
-class CarhattParser(scrapy.Spider):
+# this is product page parser
+class SMarketParser(scrapy.Spider):
     name = 'smarket_item'
-
-    start_urls = [
-        'https://www.s-kaupat.fi/tuote/kotimaista-kevytmaito-1-l/6414893386488'
-    ]
-
+    
     def extract_allergens(self, response):
         return response.css('div[data-test-id="product-info-allergens"] p::text').get()
 
@@ -125,7 +62,9 @@ class CarhattParser(scrapy.Spider):
             }
 
         return nutrition_data
-
+    
+    def extract_country(self, response):
+        return response.css('[data-test-id="product-info-country"] span::text').get()
 
     def parse(self, response):
         item = GroceryItem()
@@ -140,5 +79,6 @@ class CarhattParser(scrapy.Spider):
         item['image_urls'] = self.extract_images(response)
         item['ean'] = self.extract_ean(response)
         item['nutrition'] = self.extract_nutrition(response)
+        item['country'] = self.extract_country(response)
 
         yield item
