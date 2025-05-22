@@ -172,3 +172,26 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+# Scrapy HTTP cache & crawling state
+.scrapy/
+
+# Exported data (optional, depends on your workflow)
+*.csv
+*.json
+*.xml
+*.jl
+
+# Custom data output folders (if any)
+output/
+exports/
+data/
+
+# Log files
+*.log
+
+# Temporary project files
+*.tmp
+*.bak
+*.old
